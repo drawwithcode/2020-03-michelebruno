@@ -8,37 +8,73 @@
  * ==================================================
  */
 
-const PALETTE = {};
+const PALETTE = {}, SOUNDS = {};
 
-let cols = 21,
-    rows = 23,
-    size = 40,
+let cols,
+    rows,
+    size = 30,
     player,
     grid = [],
-    enemies;
-
+    enemies,
+    gridData,
+    leftToWin = 0;
 
 function preload() {
     // @todo load pacman images
+    gridData = loadJSON('./assets/walls.json', () => {
+        gridData = Object.values(gridData)
+    });
 
+    //Pacman.images.push(loadImage('https://www.classicgaming.cc/classics/pac-man/images/icons/pac-man-32x32.png'))
+
+    Pacman.sounds.beginning = loadSound('./assets/sounds/pacman_beginning.wav');
+    Pacman.sounds.chomp = loadSound('./assets/sounds/pacman_chomp.wav');
+    Pacman.sounds.death = loadSound('./assets/sounds/pacman_death.wav');
+    Pacman.sounds.eatfruit = loadSound('./assets/sounds/pacman_eatfruit.wav');
+    Pacman.sounds.eatghost = loadSound('./assets/sounds/pacman_eatghost.wav');
+    Pacman.sounds.extrapac = loadSound('./assets/sounds/pacman_extrapac.wav');
+    Pacman.sounds.intermission = loadSound('./assets/sounds/pacman_intermission.wav');
 
 }
+
+function setGrid() {
+    grid = new Array(rows * cols);
+    for (let y = 0; y < gridData.length; y++) {
+        let r = gridData[y];
+
+        for (let x = 0; x < r.length; x++) {
+            let w = r[x]
+            if (w === 1) {
+                grid[y * cols + x] = new Wall({x, y})
+            } else if (w === 0) {
+                grid[y * cols + x] = new Point({x, y})
+            } else {
+                grid[y * cols + x] = new FieldElement();
+            }
+        }
+    }
+
+    leftToWin = grid.filter(g => {
+        return g.isEdible() && !g.wasEaten;
+    }).length
+
+}
+
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
 
-    frameRate(15);
+    frameRate(10);
 
     pixelDensity(1);
+
+    rows = gridData.length;
+    cols = gridData[0].length;
 
     PALETTE.dark = color('#04052a');
     PALETTE.light = color('#ffe71d');
 
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-            random() > .4 ? grid.push(new Point({x, y})): grid.push(new Wall({x, y}))
-        }
-    }
+    setGrid();
 
     player = new Pacman();
 }
@@ -46,184 +82,39 @@ function setup() {
 
 function draw() {
 
-    background(PALETTE.dark)
+    background(PALETTE.dark);
+
+    push();
+
+    translate(width / 2, height / 6);
+
+
+    push();
+    translate(-size * cols / 2, 0);
     grid.forEach(c => c.run());
-
     player.run();
+    pop();
 
+    // Draw instructions.
+    push();
+
+    translate(size * cols / 2 + size * 3, height / 2 - height / 6)
+
+    fill(PALETTE.light);
+    textSize(20)
+    text("Press R to reset.", 0, 0)
+
+    pop();
+
+    pop();
 }
 
 
 function keyPressed() {
-    player.move();
-}
 
-class Entity {
-    constructor(
-        {
-            x = 10,
-            y = 10
-        } = {}
-    ) {
-        this.pos = createVector(x, y);
-        this.angle = 0;
-
-        this.color = color('red');
-    }
-
-    /**
-     * Checks typed key and updates direction;
-     *
-     * @return {p5.Vector|void}
-     */
-    getDirection() {
-        let d;
-        switch (keyCode) {
-            case UP_ARROW:
-                d = createVector(0, -1);
-                break;
-            case DOWN_ARROW:
-                d = createVector(0, 1);
-                break;
-            case LEFT_ARROW:
-                d = createVector(-1, 0);
-                break;
-            case RIGHT_ARROW:
-                d = createVector(1, 0);
-                break;
-        }
-        return d;
-    }
-
-
-    /**
-     * Should update in base of direction and
-     */
-    move() {
-
-        let d = this.getDirection();
-
-        if (!d)
-            return console.log("Was not a direction");
-
-        this.angle = radians(d.y / d.x);
-
-        const nextPos = this.pos.copy();
-
-        nextPos.add(d);
-
-        if (nextPos.x < 0) {
-            nextPos.x = cols - 1
-        } else if ( nextPos.x >= cols ) {
-            nextPos.x = 0;
-        }
-
-        if (nextPos.y < 0) {
-            nextPos.y = rows - 1
-        } else if ( nextPos.y >= rows ) {
-            nextPos.y = 0;
-        }
-
-        const facingElement = grid[nextPos.x + nextPos.y * cols];
-
-        console.log(facingElement)
-
-        // Exit the function if there is no facing element or it is an obstacle.
-        if (!facingElement || !facingElement.canBeWalkedOn())
-            return;
-
-
-        if (facingElement.canBeEaten())
-            facingElement.setEaten();
-
-        this.pos.set(nextPos)
-
-
-    }
-
-    run() {
-        push();
-
-        translate(this.pos.x * size, this.pos.y * size);
-
-        this.draw()
-
-        pop();
-    }
-
-    draw() {}
+    if (key === "r") {
+        setGrid();
+    } else if (player && player.move) player.move();
 }
 
 
-class Pacman extends Entity {
-
-    draw() {
-        push();
-        fill(this.color);
-        ellipse(size / 2, size / 2, size );
-        pop();
-    }
-}
-
-class FieldElement {
-
-    constructor({x, y} = {}) {
-        this.pos = createVector(x, y);
-        this.wasEaten = false;
-        this.edible = true;
-    }
-
-    canBeWalkedOn() {
-        return true;
-    }
-
-    canBeEaten() {
-        return this.edible && !this.wasEaten;
-    }
-
-    setEaten() {
-        return this.wasEaten = true;
-    }
-
-    run() {
-        if (this.wasEaten)
-            return;
-
-        push();
-
-        translate(this.pos.x * size, this.pos.y * size);
-
-        this.draw();
-
-        pop();
-
-    }
-
-    draw() {
-
-    };
-}
-
-class Point extends FieldElement {
-
-    draw() {
-        push();
-        fill(PALETTE.light)
-        ellipse(size / 2, size / 2, size / 2);
-        pop();
-    }
-
-}
-
-class Wall extends FieldElement {
-    canBeWalkedOn() {
-        return false;
-    }
-
-    draw() {
-        push();
-        fill('red');
-        rect(size/4, size/6, size/2, size/3);
-        pop();
-    }
-}
