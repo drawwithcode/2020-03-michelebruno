@@ -1,4 +1,10 @@
+/**
+ * @property {p5.Vector} direction
+ */
 class Entity {
+
+    direction;
+
     constructor(
         {
             x = 10,
@@ -8,43 +14,34 @@ class Entity {
         this.pos = createVector(x, y);
         this.angle = 0;
 
-        this.color = color('red');
+        this.direction = createVector(0, 1)
+
+        this.alive = true;
     }
 
-    /**
-     * Checks typed key and updates direction;
-     *
-     * @return {p5.Vector|void}
-     */
-    getDirection() {
-        let d;
-        switch (keyCode) {
-            case UP_ARROW:
-                d = createVector(0, -1);
-                break;
-            case DOWN_ARROW:
-                d = createVector(0, 1);
-                break;
-            case LEFT_ARROW:
-                d = createVector(-1, 0);
-                break;
-            case RIGHT_ARROW:
-                d = createVector(1, 0);
-                break;
-        }
-        return d;
-    }
+    run() {
+        if (!this.alive)
+            return;
 
+        this.move();
+
+        push();
+
+        translate(this.pos.x * size, this.pos.y * size);
+
+        this.draw()
+
+        pop();
+    }
 
     /**
      * Should update in base of direction and
      */
     move() {
 
-        let d = this.getDirection();
+        if (!this.alive) return;
 
-        if (!d)
-            return console.warn("Was not a direction");
+        let d = this.getDirection();
 
         this.angle = atan2(d.y, d.x);
 
@@ -64,75 +61,62 @@ class Entity {
             nextPos.y = 0;
         }
 
-        let index = nextPos.x + nextPos.y * cols;
+        const facingElement = grid[nextPos.x + nextPos.y * cols];
 
-        const facingElement = grid[index];
-
-        if (this.onFacingElement(facingElement)) { // We can go on.
-            this.pos.set(nextPos)
-        }
+        if (this.canWalkOver(facingElement))
+            this.pos.set(nextPos);
 
     }
 
     /**
      *
-     * @param el
-     * @return {boolean} True if the entity can go on, false otherwsise.
+     * @param {FieldElement} el
+     * @return {boolean} True if the entity can go on, false otherwise.
      */
-    onFacingElement(el) {
-        // Exit the function if there is no facing element or it is an obstacle.
-        if (!el || !el.isWalkable())
+    canWalkOver(el) {
+        if (!el)
             return false;
 
-
-        if (el.isEdible() && !el.wasEaten)
-            el.setEaten();
-
-        return true;
+        if (el.isWalkable())
+            return true;
+        else this.onCantGo();
     }
 
-    run() {
-        push();
-
-        translate(this.pos.x * size, this.pos.y * size);
-
-        this.draw()
-
-        pop();
-    }
 
     draw() {
     }
 
-    play() {
+    getDirection() {
     }
 
+    onCantGo() {
+    }
+
+    die() {
+        this.alive = false;
+    }
 }
 
 
-class Pacman extends Entity {
-
-    /**
-     *
-     * @type {p5.Image[]}
-     */
-    static images = []
-
-    static sounds = {};
+class Ghost extends Entity {
 
     draw() {
-        let img = Pacman.images[0];
-        push();
-        fill(PALETTE.light)
+        let w = min(Ghost.image.width, size),
+            offset = (size - w) / 2;
 
-        translate(size / 2, size / 2)
-        rotate(this.angle);
-        let a = map(cos(frameCount), -1, 1, 0, QUARTER_PI * 0.9)
-        arc(0, 0, size, size, a, -a);
+        image(Ghost.image, offset, offset + sin(frameCount / 2) * 3, w, w);
 
-        // fill('white');
-        // ellipse(size / 3 * cos(QUARTER_PI), size / 3 * sin(QUARTER_PI), 10);
-        pop();
     }
 
+    getDirection() {
+        if (!this.direction || !this.direction instanceof p5.Vector)
+            this.direction = Entity.directions.random();
+
+        return this.direction;
+    }
+
+    onCantGo() {
+        console.log("cant go", this)
+        this.direction = Entity.directions.random();
+    }
 }
