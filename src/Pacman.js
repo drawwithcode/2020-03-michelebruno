@@ -93,6 +93,9 @@ class Pacman extends Entity {
     }
 
     onMeetGhost(ghost) {
+        if (!ghost.alive)
+            return ;
+
         if (this.isInvincible()) {
             ghost.die();
         } else {

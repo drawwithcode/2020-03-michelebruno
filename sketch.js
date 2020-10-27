@@ -87,7 +87,7 @@ function setGrid() {
             if (w === 1) {
                 grid[y * cols + x] = new Wall({x, y})
             } else if (w === 0) {
-                grid[y * cols + x] = random() > .1 ? new Point({x, y}) : new Fruit({x, y});
+                grid[y * cols + x] = random() > .1 ? new Dot({x, y}) : new Fruit({x, y});
             } else {
                 grid[y * cols + x] = new FieldElement();
             }

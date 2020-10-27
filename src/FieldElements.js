@@ -17,7 +17,8 @@ class FieldElement {
         if (this.wasEaten)
             return true;
 
-        Pacman.sounds.eatfruit.play()
+        if (!Pacman.sounds.eatghost.isPlaying())
+            Pacman.sounds.eatfruit.play();
         leftToWin--;
         return this.wasEaten = true;
     }
@@ -51,7 +52,7 @@ class FieldElement {
     }
 }
 
-class Point extends FieldElement {
+class Dot extends FieldElement {
 
     draw() {
         push();
@@ -67,7 +68,7 @@ class Point extends FieldElement {
 
 }
 
-class Fruit extends Point {
+class Fruit extends Dot {
     static fruits = [
         {
             lastsFor: 10
@@ -96,8 +97,9 @@ class Fruit extends Point {
     }
 
     setEaten() {
-        player.setInvincible({lastsFor: this.lastsFor})
-        return super.setEaten();
+        if (!this.wasEaten) player.setInvincible({lastsFor: this.lastsFor})
+
+        super.setEaten();
     }
 }
 

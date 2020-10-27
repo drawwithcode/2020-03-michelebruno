@@ -112,11 +112,24 @@ class Ghost extends Entity {
         if (!this.direction || !this.direction instanceof p5.Vector)
             this.direction = Entity.directions.random();
 
+
+        let d = Ghost.directions.random();
+        let possiblePos = this.pos.copy()
+        possiblePos.add(d)
+
+        if (random() > .5 && grid[possiblePos.x + possiblePos.y * cols].isWalkable())
+            return this.direction = d;
+
+
         return this.direction;
     }
 
     onCantGo() {
-        console.log("cant go", this)
         this.direction = Entity.directions.random();
+    }
+
+    die() {
+        super.die();
+        Pacman.sounds.eatghost.play();
     }
 }
