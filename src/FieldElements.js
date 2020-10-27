@@ -73,10 +73,10 @@ class Dot extends FieldElement {
 class Fruit extends Dot {
     static fruits = [
         {
-            lastsFor: 30
+            lastsFor: 70
         },
         {
-            lastsFor: 20
+            lastsFor: 40
         }
     ];
 
@@ -91,10 +91,13 @@ class Fruit extends Dot {
     }
 
     draw() {
-        let w = min(this.img.width, size),
-            offset = (size - w) / 2;
+        let w = min(this.img.width, size);
 
-        image(this.img, offset, offset + sin(frameCount / 2) * 3, w, w);
+        noStroke();
+        fill(PALETTE.light)
+        ellipse(size / 2, size / 2, size * .9 + cos(frameCount ))
+
+        // image(this.img, offset, offset + sin(frameCount / 2) * 3, w, w);
 
     }
 

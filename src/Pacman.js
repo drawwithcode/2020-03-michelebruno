@@ -52,18 +52,16 @@ class Pacman extends Entity {
         push();
 
         noStroke();
-        if (this.isInvincible()) {
-
-            let c = map(this.invincibleTil - frameCount, this.invincibleTil - this.invicibilityTotalTime, this.invincibleTil, 0, .8);
-            console.log(c)
-            frameCount % 2 === 0 ? fill(lerpColor(color(random(['orange', 'red'])), PALETTE.light, c)) : fill(PALETTE.light)
+        if (this.isInvincible() && frameCount % 2) {
+            fill(color("#d80e18"))
         } else fill(PALETTE.light);
+
 
         translate(size / 2, size / 2)
 
         rotate(this.direction.heading());
 
-        let a = map(cos(frameCount), -1, 1, 0, QUARTER_PI * .8);
+        let a = map(cos(frameCount * 8), -1, 1, 0, QUARTER_PI * .8);
 
         arc(0, 0, size, size, a, -a);
 

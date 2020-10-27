@@ -31,6 +31,7 @@ let cols,
     score,
     logo,
     gameHeight,
+    fSize = 25,
     life = 3;
 
 const PALETTE = {}, SOUNDS = {};
@@ -74,7 +75,7 @@ function startGame() {
 
     life = 3;
 
-    score.reset();
+    if (!isWin()) score.reset();
 
     player = new Pacman();
 
@@ -144,7 +145,7 @@ function setup() {
 
     createCanvas(windowWidth, windowHeight);
 
-    frameRate(6);
+    frameRate(12);
 
     // Set here the default font.
     textFont("Joystix");
@@ -198,7 +199,6 @@ function windowResized() {
 function draw() {
     // The game ends if there is no dots/fruits or there are no more ghosts.
     if (!leftToWin || !ghosts.filter(g => g.alive).length) {
-        console.log("Victory")
         return drawWin();
     }
 
@@ -221,14 +221,22 @@ function draw() {
 
     translate(-size * cols / 2, 0);
     fill('white');
-    textSize(30);
+    textSize(fSize);
 
     if (!life) fill('red');
 
     text(life ? life + "UP" : "GAME OVER", size, 15);
+    text(score.current, size, 15 + fSize);
+
     textAlign(RIGHT);
-    text("SCORE " + (score.highest), cols * size, 15);
-    translate(0, 20);
+
+    text("HIGH SCORE ", cols * size, 15);
+
+    textAlign(CENTER);
+
+    text(score.highest, (cols - 3) * size, 15 + fSize);
+
+    translate(0, fSize * 1.5);
     grid.forEach(c => c.run());
     ghosts.forEach(c => c.run());
     player.run();
@@ -241,22 +249,40 @@ function draw() {
      */
     push();
 
-    translate(-cols * size / 2 + size, rows * size + size * 1.5)
+    translate(-cols * size / 2, rows * size + size * 1.5);
+
     fill(PALETTE.light);
 
-    textSize(20);
-    textAlign(LEFT)
+    textSize(fSize);
 
-    text("Press R to reset.", 0, 0);
+    textAlign(LEFT);
+
+    if (isWin()) {
+        fill('green');
+        text("Press C to continue.", size, 15);
+    } else text("Press R to reset.", size, 15);
 
     pop();
 
     pop();
 }
 
+function isWin() {
+
+    if (leftToWin === 0)
+        return true;
+
+    if (ghosts && ghosts.filter(g => g.alive).length === 0)
+        return true;
+    else return false;
+}
 
 function keyPressed() {
     if (key === "r") {
+        startGame();
+    }
+
+    if (key === "c" && isWin()) {
         startGame();
     }
 }
