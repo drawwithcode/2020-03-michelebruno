@@ -96,6 +96,7 @@ class Pacman extends Entity {
         if (!ghost.alive)
             return ;
 
+        // noLoop();
         if (this.isInvincible()) {
             ghost.die();
         } else {

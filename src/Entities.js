@@ -109,6 +109,10 @@ class Ghost extends Entity {
     }
 
     getDirection() {
+        if (this.pos.x === player.pos.x && this.pos.y === player.pos.y) {
+            player.onMeetGhost(this);
+        }
+
         if (!this.direction || !this.direction instanceof p5.Vector)
             this.direction = Entity.directions.random();
 
@@ -117,6 +121,7 @@ class Ghost extends Entity {
         let possiblePos = this.pos.copy()
         possiblePos.add(d)
 
+        console.log(possiblePos)
         if (random() > .5 && grid[possiblePos.x + possiblePos.y * cols].isWalkable())
             return this.direction = d;
 

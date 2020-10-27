@@ -62,14 +62,35 @@ function setSizes() {
  */
 function startGame() {
     setGrid()
-    player = new Pacman();
 
+    player = new Pacman();
 
     ghosts = [];
 
-    ghosts.push(new Ghost({
-        x: 1, y: 2
-    }))
+    let g = floor(random(3, 5))
+
+    for (let i = 0; i < g; i++) {
+        let x = floor(random(1, cols - 1)),
+            y = floor(random(1, rows - 1));
+
+        if (grid[x + cols * y] instanceof Wall) {
+            i--;
+            continue;
+        }
+
+        let ghost = new Ghost({
+            x, y
+        });
+
+
+        // console.log(ghost.pos.sub(player.pos).mag())
+        if (ghost.pos.copy().sub(player.pos).mag() < 10) {
+            i--;
+            continue;
+        }
+
+        ghosts.push(ghost)
+    }
 
 }
 
