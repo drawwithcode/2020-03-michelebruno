@@ -10,7 +10,7 @@ class Entity {
     ) {
         this.pos = createVector(x, y);
 
-        this.direction = createVector(0, 1);
+        this.direction = createVector(0, 0);
 
         this.alive = true;
     }
@@ -91,6 +91,7 @@ class Entity {
 
 
 class Ghost extends Entity {
+
 
     draw() {
         this.checkIfMetPlayer();

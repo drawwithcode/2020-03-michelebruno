@@ -26,7 +26,8 @@ let cols,
     ghosts,
     leftToWin = 0,
     logo,
-    gameHeight;
+    gameHeight,
+    life = 3;
 
 const PALETTE = {}, SOUNDS = {};
 
@@ -66,6 +67,8 @@ function setSizes() {
  */
 function startGame() {
     setGrid()
+
+    life = 3;
 
     player = new Pacman();
 
@@ -167,11 +170,13 @@ function setup() {
 function drawWin() {
     push();
 
-    textSize(40)
+    let fSize = 90;
+    textSize(fSize)
+    textAlign(CENTER)
+    fill('green')
 
-    fill('red')
-
-    text('You won!', width / 2, height / 2);
+    let s = 'You won!'
+    text(s, width / 2 - s.length, height / 2);
 
     pop();
 
@@ -205,7 +210,17 @@ function draw() {
     image(logo, -logoData.w / 2, 10 - height / 5);
 
     push();
+
     translate(-size * cols / 2, 0);
+    fill('white');
+    textSize(30);
+
+    if (!life) fill('red');
+
+    text(life ? life + "UP" : "GAME OVER", size, 15);
+    textAlign(RIGHT);
+    text("SCORE " + (grid.filter(i => i instanceof Dot).length - leftToWin), cols * size, 15);
+    translate(0, 20);
     grid.forEach(c => c.run());
     ghosts.forEach(c => c.run());
     player.run();

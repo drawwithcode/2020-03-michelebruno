@@ -1,20 +1,9 @@
 class Pacman extends Entity {
     /**
-     *
-     * @type {p5.Image[]}
-     */
-    static images = []
-
-    /**
-     * Sounds to play on Pacman events.
-     */
-    static sounds = {};
-
-    /**
      * True if Pacman keeps going without typing arrows.
      * @type {boolean}
      */
-    keepMoving = false;
+    keepMoving = true;
 
     /**
      * Frame until when Pacman is invincible
@@ -37,20 +26,23 @@ class Pacman extends Entity {
             d = this.direction;
         } else d = createVector(0, 0);
 
-        switch (keyCode) {
-            case UP_ARROW:
-                d = Entity.directions.up;
-                break;
-            case DOWN_ARROW:
-                d = Entity.directions.down;
-                break;
-            case LEFT_ARROW:
-                d = Entity.directions.left;
-                break;
-            case RIGHT_ARROW:
-                d = Entity.directions.right;
-                break;
+
+        if (keyIsDown(UP_ARROW)) {
+            d = Entity.directions.up;
+
         }
+        if (keyIsDown(DOWN_ARROW)) {
+            d = Entity.directions.down;
+
+        }
+        if (keyIsDown(LEFT_ARROW)) {
+            d = Entity.directions.left;
+
+        }
+        if (keyIsDown(RIGHT_ARROW)) {
+            d = Entity.directions.right;
+        }
+
 
         return this.direction = d;
     }
@@ -60,8 +52,11 @@ class Pacman extends Entity {
         push();
 
         noStroke();
-        if (this.isInvincible() && frameCount % 2) {
-            fill('red')
+        if (this.isInvincible()) {
+
+                let c = map(this.invincibleTil - frameCount, this.invincibleTil - this.invicibilityTotalTime, this.invincibleTil, 0, .8);
+            console.log(c)
+            frameCount % 2 === 0 ? fill(lerpColor(color(random(['orange', 'red'])), PALETTE.light, c)) : fill(PALETTE.light)
         } else fill(PALETTE.light);
 
         translate(size / 2, size / 2)
@@ -99,12 +94,16 @@ class Pacman extends Entity {
     }
 
     setInvincible({lastsFor = 0} = {}) {
+
+
         if (this.isInvincible()) {
             this.invincibleTil += lastsFor;
 
         } else {
             this.invincibleTil = frameCount + lastsFor;
         }
+
+        // SOUNDS.intermission.play();
     }
 
     /**
@@ -127,9 +126,18 @@ class Pacman extends Entity {
 
         if (!this.alive)
             return;
+
         SOUNDS.death.play();
 
-
         super.die();
+
+        life--;
+
+
+        if (life) {
+            setTimeout(() => {
+                player = new Pacman();
+            }, 2000)
+        }
     }
 }
