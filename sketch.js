@@ -25,6 +25,10 @@ let cols,
     gridData,
     ghosts,
     leftToWin = 0,
+    /**
+     * @type {Score}
+     */
+    score,
     logo,
     gameHeight,
     life = 3;
@@ -69,6 +73,8 @@ function startGame() {
     setGrid()
 
     life = 3;
+
+    score.reset();
 
     player = new Pacman();
 
@@ -163,6 +169,8 @@ function setup() {
     PALETTE.dark = color('#04052a');
     PALETTE.light = color('#ffe71d');
 
+    score = new Score();
+
     startGame();
 
 }
@@ -219,7 +227,7 @@ function draw() {
 
     text(life ? life + "UP" : "GAME OVER", size, 15);
     textAlign(RIGHT);
-    text("SCORE " + (grid.filter(i => i instanceof Dot).length - leftToWin), cols * size, 15);
+    text("SCORE " + (score.highest), cols * size, 15);
     translate(0, 20);
     grid.forEach(c => c.run());
     ghosts.forEach(c => c.run());
@@ -233,14 +241,13 @@ function draw() {
      */
     push();
 
-    translate(size * cols / 2 + size * 3, height / 2 - height / 6)
-
+    translate(-cols * size / 2 + size, rows * size + size * 1.5)
     fill(PALETTE.light);
 
     textSize(20);
+    textAlign(LEFT)
 
     text("Press R to reset.", 0, 0);
-    text(leftToWin + ' to win.', 0, 25);
 
     pop();
 
@@ -253,3 +260,21 @@ function keyPressed() {
         startGame();
     }
 }
+
+class Score {
+    constructor() {
+        this.current = 0;
+        this.highest = 0;
+    }
+
+    add(inc = 1) {
+        this.current += inc;
+        if (this.current > this.highest)
+            this.highest = this.current;
+    }
+
+    reset() {
+        this.current = 0;
+    }
+}
+

@@ -21,6 +21,7 @@ class FieldElement {
             SOUNDS.eatfruit.play();
 
         leftToWin--;
+        score.add();
         return this.wasEaten = true;
     }
 
@@ -125,17 +126,18 @@ class Wall extends FieldElement {
         noFill();
         this.drawLine({
             color: '#2424ff',
-            strk: 7
+            strk: 9
         });
         this.drawLine({
             color: '#246dff',
-            strk: 5
+            strk: 7
         });
         this.drawLine({
             color: PALETTE.dark,
             strk: 3,
             options: {
-                addStroke: 7
+                addStroke: 7,
+
             }
         });
 
@@ -146,7 +148,6 @@ class Wall extends FieldElement {
 
         push();
 
-
         stroke(color);
         strokeWeight(strk);
 
@@ -155,6 +156,49 @@ class Wall extends FieldElement {
         }
 
         pop();
+    }
+
+    /**
+     *
+     * @param {String|Array} type
+     * @param addStroke
+     */
+    drawSegment(type, {addStroke = 0} = {}) {
+        if (Array.isArray(type)) {
+            type.forEach(c => this.drawSegment(c));
+        }
+
+        if (typeof type === "string") {
+
+            if (type.length > 1) {
+                return this.drawSegment(type.split(""), options)
+            }
+
+            let s = size + addStroke * 2;
+
+            push();
+
+            if (addStroke)
+                strokeCap(SQUARE)
+            switch (type) {
+                case 'a':
+                    line(size / 2, size / 2, s, size / 2);
+                    break;
+                case 'b':
+                    line(size / 2, size / 2, size / 2, s,);
+                    break;
+                case 'c':
+                    line(size / 2, size / 2, -addStroke, size / 2);
+                    break;
+                case 'd':
+                    line(size / 2, size / 2, size / 2, -addStroke);
+                    break;
+                case 'o':
+                    noFill();
+                    ellipse(size / 2, size / 2, size * .8)
+            }
+            pop();
+        }
     }
 
     guessShape() {
@@ -204,45 +248,5 @@ class Wall extends FieldElement {
         return this.shape = this.shape.filter(onlyUnique);
 
 
-    }
-
-    /**
-     *
-     * @param {String|Array} type
-     * @param addStroke
-     */
-    drawSegment(type, {addStroke = 0} = {}) {
-        if (Array.isArray(type)) {
-            type.forEach(c => this.drawSegment(c));
-        }
-
-        if (typeof type === "string") {
-
-            if (type.length > 1) {
-                return this.drawSegment(type.split(""), options)
-            }
-
-            let s = size + addStroke;
-
-            push();
-            switch (type) {
-                case 'a':
-                    line(size / 2, size / 2, s, size / 2);
-                    break;
-                case 'b':
-                    line(size / 2, size / 2, size / 2, s,);
-                    break;
-                case 'c':
-                    line(size / 2, size / 2, -addStroke, size / 2);
-                    break;
-                case 'd':
-                    line(size / 2, size / 2, size / 2, -addStroke);
-                    break;
-                case 'o':
-                    noFill();
-                    ellipse(size / 2, size / 2, size * .8)
-            }
-            pop();
-        }
     }
 }

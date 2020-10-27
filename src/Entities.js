@@ -147,10 +147,8 @@ class Ghost extends Entity {
 
         super.die();
 
+        score.add(10)
+
         SOUNDS.eatghost.play();
-
-        if (!ghosts.filter(g => g.alive).length) {
-
-        }
     }
 }
