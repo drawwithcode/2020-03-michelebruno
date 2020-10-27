@@ -2,9 +2,6 @@
  * @property {p5.Vector} direction
  */
 class Entity {
-
-    direction;
-
     constructor(
         {
             x = 10,
@@ -12,9 +9,8 @@ class Entity {
         } = {}
     ) {
         this.pos = createVector(x, y);
-        this.angle = 0;
 
-        this.direction = createVector(0, 1)
+        this.direction = createVector(0, 1);
 
         this.alive = true;
     }
@@ -41,9 +37,9 @@ class Entity {
 
         if (!this.alive) return;
 
-        let d = this.getDirection();
+        this.beforeRun();
 
-        this.angle = atan2(d.y, d.x);
+        let d = this.getDirection();
 
         const nextPos = this.pos.copy();
 
@@ -68,6 +64,9 @@ class Entity {
 
     }
 
+    beforeRun() {
+    }
+
     /**
      *
      * @param {FieldElement} el
@@ -82,13 +81,6 @@ class Entity {
         else this.onCantGo();
     }
 
-
-    draw() {
-    }
-
-    getDirection() {
-    }
-
     onCantGo() {
     }
 
@@ -101,27 +93,35 @@ class Entity {
 class Ghost extends Entity {
 
     draw() {
+        this.checkIfMetPlayer();
+
+        if (!this.alive)
+            return;
+
         let w = min(Ghost.image.width, size),
             offset = (size - w) / 2;
 
         image(Ghost.image, offset, offset + sin(frameCount / 2) * 3, w, w);
+    }
 
+    beforeRun() {
+        super.beforeRun();
+        this.checkIfMetPlayer();
     }
 
     getDirection() {
-        if (this.pos.x === player.pos.x && this.pos.y === player.pos.y) {
-            player.onMeetGhost(this);
-        }
 
+        // If necessary, initiates the direction vector object.
         if (!this.direction || !this.direction instanceof p5.Vector)
             this.direction = Entity.directions.random();
 
 
-        let d = Ghost.directions.random();
-        let possiblePos = this.pos.copy()
+        let d = Ghost.directions.random(),
+            possiblePos = this.pos.copy();
+
         possiblePos.add(d)
 
-        console.log(possiblePos)
+        // Randomly, tries to change direction if possible.
         if (random() > .5 && grid[possiblePos.x + possiblePos.y * cols].isWalkable())
             return this.direction = d;
 
@@ -129,12 +129,27 @@ class Ghost extends Entity {
         return this.direction;
     }
 
+    checkIfMetPlayer() {
+
+        if (this.pos.x === player.pos.x && this.pos.y === player.pos.y) {
+            player.onMeetGhost(this);
+        }
+    }
+
     onCantGo() {
         this.direction = Entity.directions.random();
     }
 
     die() {
+        if (!this.alive)
+            return;
+
         super.die();
-        Pacman.sounds.eatghost.play();
+
+        SOUNDS.eatghost.play();
+
+        if (!ghosts.filter(g => g.alive).length) {
+
+        }
     }
 }

@@ -23,6 +23,8 @@ class Pacman extends Entity {
      */
     invincibleTil = 0;
 
+    invicibilityTotalTime = 0;
+
     /**
      * Checks typed key and updates direction;
      *
@@ -64,7 +66,7 @@ class Pacman extends Entity {
 
         translate(size / 2, size / 2)
 
-        rotate(this.angle);
+        rotate(this.direction.heading());
 
         let a = map(cos(frameCount), -1, 1, 0, QUARTER_PI * .8);
 
@@ -72,19 +74,11 @@ class Pacman extends Entity {
 
         fill('black');
 
-        if (this.angle === 0) rotate(PI);
+        if (this.direction.heading() === 0) rotate(PI);
 
         ellipse(0, size / 4, 5);
 
         pop();
-
-        for (let i = 0; i < ghosts.length; i++) {
-            let g = ghosts[i];
-            if (g.pos.x === this.pos.x && g.pos.y === this.pos.y) {
-                return this.onMeetGhost(g);
-            }
-        }
-
     }
 
     canWalkOver(el) {
@@ -94,7 +88,7 @@ class Pacman extends Entity {
 
     onMeetGhost(ghost) {
         if (!ghost.alive)
-            return ;
+            return;
 
         // noLoop();
         if (this.isInvincible()) {
@@ -104,9 +98,13 @@ class Pacman extends Entity {
         }
     }
 
-
     setInvincible({lastsFor = 0} = {}) {
-        this.invincibleTil = frameCount + lastsFor;
+        if (this.isInvincible()) {
+            this.invincibleTil += lastsFor;
+
+        } else {
+            this.invincibleTil = frameCount + lastsFor;
+        }
     }
 
     /**
@@ -115,15 +113,23 @@ class Pacman extends Entity {
      * @return {boolean}
      */
     isInvincible() {
-        return frameCount < this.invincibleTil;
+        if (frameCount < this.invincibleTil) {
+            return true
+        } else {
+            this.invicibilityTotalTime = 0;
+        }
     }
 
     /**
      * I'm sorry, you died.
      */
     die() {
-        super.die();
 
-        Pacman.sounds.death.play();
+        if (!this.alive)
+            return;
+        SOUNDS.death.play();
+
+
+        super.die();
     }
 }

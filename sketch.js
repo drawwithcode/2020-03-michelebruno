@@ -39,16 +39,20 @@ function preload() {
     logo = loadImage('./assets/img/logo.png');
 
     Ghost.image = loadImage('./assets/img/ghost-chase-32x32.png');
-    Fruit.fruits[0].img = loadImage('./assets/img/fruit_cherry.gif');
-    Fruit.fruits[1].img = loadImage('./assets/img/fruit_apple.gif');
+    Fruit.fruits[0].img = loadImage('./assets/img/fruit_cherry.png');
+    Fruit.fruits[1].img = loadImage('./assets/img/fruit_apple.png');
 
-    Pacman.sounds.beginning = loadSound('./assets/sounds/pacman_beginning.wav');
-    Pacman.sounds.chomp = loadSound('./assets/sounds/pacman_chomp.wav');
-    Pacman.sounds.death = loadSound('./assets/sounds/pacman_death.wav');
-    Pacman.sounds.eatfruit = loadSound('./assets/sounds/pacman_eatfruit.wav');
-    Pacman.sounds.eatghost = loadSound('./assets/sounds/pacman_eatghost.wav');
-    Pacman.sounds.extrapac = loadSound('./assets/sounds/pacman_extrapac.wav');
-    Pacman.sounds.intermission = loadSound('./assets/sounds/pacman_intermission.wav');
+    SOUNDS.beginning = loadSound('./assets/sounds/pacman_beginning.wav');
+    SOUNDS.chomp = loadSound('./assets/sounds/pacman_chomp.wav');
+    SOUNDS.death = loadSound('./assets/sounds/pacman_death.wav');
+    SOUNDS.eatfruit = loadSound('./assets/sounds/pacman_eatfruit.wav');
+    SOUNDS.eatghost = loadSound('./assets/sounds/pacman_eatghost.wav');
+    SOUNDS.extrapac = loadSound('./assets/sounds/pacman_extrapac.wav');
+    SOUNDS.intermission = loadSound('./assets/sounds/pacman_intermission.wav');
+
+    SOUNDS.eatfruit.setVolume(.8)
+    SOUNDS.eatghost.setVolume(.8)
+    SOUNDS.extrapac.setVolume(.8)
 
 }
 
@@ -92,6 +96,8 @@ function startGame() {
         ghosts.push(ghost)
     }
 
+    SOUNDS.beginning.play();
+
 }
 
 /**
@@ -100,6 +106,7 @@ function startGame() {
 function setGrid() {
     grid = new Array(rows * cols);
 
+    let maxFruits = 6, fruits = 0;
     for (let y = 0; y < gridData.length; y++) {
         let r = gridData[y];
 
@@ -108,7 +115,10 @@ function setGrid() {
             if (w === 1) {
                 grid[y * cols + x] = new Wall({x, y})
             } else if (w === 0) {
-                grid[y * cols + x] = random() > .1 ? new Dot({x, y}) : new Fruit({x, y});
+                if (random() < .02 && fruits < maxFruits) {
+                    grid[y * cols + x] = new Fruit({x, y});
+                    fruits++;
+                } else grid[y * cols + x] = new Dot({x, y});
             } else {
                 grid[y * cols + x] = new FieldElement();
             }
@@ -122,6 +132,7 @@ function setGrid() {
 
 
 function setup() {
+
     createCanvas(windowWidth, windowHeight);
 
     frameRate(6);
@@ -153,14 +164,32 @@ function setup() {
 
 }
 
+function drawWin() {
+    push();
+
+    textSize(40)
+
+    fill('red')
+
+    text('You won!', width / 2, height / 2);
+
+    pop();
+
+}
+
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight)
     setSizes();
 }
 
 function draw() {
+    // The game ends if there is no dots/fruits or there are no more ghosts.
+    if (!leftToWin || !ghosts.filter(g => g.alive).length) {
+        console.log("Victory")
+        return drawWin();
+    }
 
-    background(PALETTE.dark);
+    background('black');
 
     push();
 

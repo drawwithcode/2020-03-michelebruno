@@ -17,8 +17,9 @@ class FieldElement {
         if (this.wasEaten)
             return true;
 
-        if (!Pacman.sounds.eatghost.isPlaying())
-            Pacman.sounds.eatfruit.play();
+        if (!SOUNDS.eatghost.isPlaying() && !SOUNDS.beginning.isPlaying())
+            SOUNDS.eatfruit.play();
+
         leftToWin--;
         return this.wasEaten = true;
     }
@@ -71,10 +72,10 @@ class Dot extends FieldElement {
 class Fruit extends Dot {
     static fruits = [
         {
-            lastsFor: 10
+            lastsFor: 30
         },
         {
-            lastsFor: 10
+            lastsFor: 20
         }
     ];
 
@@ -130,15 +131,18 @@ class Wall extends FieldElement {
             color: '#246dff',
             strk: 5
         });
-        // this.drawLine({
-        //     color: '#249fff',
-        //     strk: 3
-        // });
+        this.drawLine({
+            color: PALETTE.dark,
+            strk: 3,
+            options: {
+                addStroke: 7
+            }
+        });
 
         pop();
     }
 
-    drawLine({color, strk}) {
+    drawLine({color, strk, options = {}} = {}) {
 
         push();
 
@@ -147,13 +151,8 @@ class Wall extends FieldElement {
         strokeWeight(strk);
 
         if (this.guessShape()) {
-            this.drawSegment(this.shape);
-        } else {
-            noStroke();
-            fill(color);
-            ellipse(size / 2, size / 2, 5);
+            this.drawSegment(this.shape, options);
         }
-
 
         pop();
     }
@@ -164,8 +163,10 @@ class Wall extends FieldElement {
 
         this.shape = "";
 
-        let myX = this.pos.x;
-        let myY = this.pos.y;
+        let {
+            x: myX,
+            y: myY
+        } = this.pos
 
         if (myX > 0) {
             let n = grid[myX - 1 + myY * cols]
@@ -192,7 +193,7 @@ class Wall extends FieldElement {
         }
 
         if (!this.shape)
-            this.shape = "abcd";
+            this.shape = "o";
 
         this.shape = this.shape.split("");
 
@@ -208,8 +209,9 @@ class Wall extends FieldElement {
     /**
      *
      * @param {String|Array} type
+     * @param addStroke
      */
-    drawSegment(type) {
+    drawSegment(type, {addStroke = 0} = {}) {
         if (Array.isArray(type)) {
             type.forEach(c => this.drawSegment(c));
         }
@@ -217,23 +219,30 @@ class Wall extends FieldElement {
         if (typeof type === "string") {
 
             if (type.length > 1) {
-                return this.drawSegment(type.split(""))
+                return this.drawSegment(type.split(""), options)
             }
 
+            let s = size + addStroke;
+
+            push();
             switch (type) {
                 case 'a':
-                    line(size / 2, size / 2, size, size / 2);
+                    line(size / 2, size / 2, s, size / 2);
                     break;
                 case 'b':
-                    line(size / 2, size, size / 2, size / 2);
+                    line(size / 2, size / 2, size / 2, s,);
                     break;
                 case 'c':
-                    line(size / 2, size / 2, 0, size / 2);
+                    line(size / 2, size / 2, -addStroke, size / 2);
                     break;
                 case 'd':
-                    line(size / 2, size / 2, size / 2, 0);
+                    line(size / 2, size / 2, size / 2, -addStroke);
                     break;
+                case 'o':
+                    noFill();
+                    ellipse(size / 2, size / 2, size * .8)
             }
+            pop();
         }
     }
 }
