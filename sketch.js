@@ -13,6 +13,7 @@ let cols,
     rows,
     size = 30,
     player,
+    started = false,
     /**
      * The list of the elements: walls, dots, fruits.
      *
@@ -106,7 +107,7 @@ function startGame() {
         ghosts.push(ghost)
     }
 
-    SOUNDS.beginning.play();
+    started && SOUNDS.beginning.play();
 
 }
 
@@ -257,7 +258,10 @@ function draw() {
 
     textAlign(LEFT);
 
-    if (isWin()) {
+    if (!started) {
+        fill([0, 1, 2, 3, 4, 5].indexOf(frameCount % 8) !== -1 ? 'yellow' : 'black');
+        text("Press C to insert coin.", size, 15);
+    } else if (isWin()) {
         fill('green');
         text("Press C to continue.", size, 15);
     } else text("Press R to reset.", size, 15);
@@ -282,7 +286,10 @@ function keyPressed() {
         startGame();
     }
 
-    if (key === "c" && isWin()) {
+    if (key === "c" && !started) {
+        started = true;
+        started && SOUNDS.beginning.play();
+    } else if (key === "c" && isWin()) {
         startGame();
     }
 }

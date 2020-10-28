@@ -42,7 +42,7 @@ class Entity {
 
         let d = this.getDirection();
 
-        if (frameCount % 2 !== 0)
+        if (frameCount % 2 !== 0 || !started)
             return;
 
         const nextPos = this.pos.copy();
