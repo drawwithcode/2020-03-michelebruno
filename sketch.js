@@ -137,7 +137,7 @@ function setGrid() {
     }
 
     leftToWin = grid.filter(g => {
-        return g.isEdible() && !g.wasEaten;
+        return g instanceof Dot;
     }).length
 }
 
